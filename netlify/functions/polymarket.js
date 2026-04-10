@@ -9,19 +9,48 @@ const FALLBACK_MARKETS = [
     outcomePrices: [0.62, 0.38],
     spread: 0.02,
     endDate: '2026-04-11T00:00:00.000Z'
-  },
-  {
-    question: 'Will the Fed cut rates in the next meeting?',
-    slug: 'fed-cut-next-meeting',
-    liquidity: 510000,
-    volume24hr: 128000,
-    volume: 2140000,
-    oneDayPriceChange: -0.031,
-    outcomePrices: [0.41, 0.59],
-    spread: 0.018,
-    endDate: '2026-05-06T18:00:00.000Z'
   }
 ];
+
+const CRYPTO_KEYWORDS = [
+  'crypto',
+  'cryptocurrency',
+  'bitcoin',
+  'btc',
+  'ethereum',
+  'eth',
+  'solana',
+  'sol',
+  'doge',
+  'xrp',
+  'bnb'
+];
+
+function normalizeText(value) {
+  return typeof value === 'string' ? value.toLowerCase() : '';
+}
+
+function hasCryptoKeyword(text) {
+  return CRYPTO_KEYWORDS.some((keyword) => text.includes(keyword));
+}
+
+function isCryptoMarket(market) {
+  const searchable = [
+    market?.question,
+    market?.slug,
+    market?.description,
+    market?.category,
+    ...(Array.isArray(market?.tags) ? market.tags : []),
+    ...(Array.isArray(market?.events)
+      ? market.events.flatMap((event) => [event?.title, event?.slug, ...(Array.isArray(event?.tags) ? event.tags : [])])
+      : [])
+  ]
+    .map(normalizeText)
+    .filter(Boolean)
+    .join(' ');
+
+  return hasCryptoKeyword(searchable);
+}
 
 exports.handler = async (event) => {
   const limit = Number(event.queryStringParameters?.limit || 50);
@@ -40,7 +69,7 @@ exports.handler = async (event) => {
     }
 
     const data = await apiRes.json();
-    const markets = Array.isArray(data) ? data : data?.markets || [];
+    const markets = (Array.isArray(data) ? data : data?.markets || []).filter(isCryptoMarket);
 
     return {
       statusCode: 200,
