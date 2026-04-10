@@ -8,6 +8,7 @@ const volumeEl = document.getElementById('volume');
 const highlightsEl = document.getElementById('highlights');
 
 let markets = [];
+const CRYPTO_KEYWORDS = ['crypto', 'cryptocurrency', 'bitcoin', 'btc', 'ethereum', 'eth', 'solana', 'sol', 'doge', 'xrp', 'bnb'];
 
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 const pct = new Intl.NumberFormat('en-US', { style: 'percent', maximumFractionDigits: 2 });
@@ -27,6 +28,24 @@ function getYesProbability(market) {
 
 function getShift24h(market) {
   return toNumber(market.oneDayPriceChange ?? market.priceChange24h ?? market.price_change_24h);
+}
+
+function isCryptoMarket(market) {
+  const searchable = [
+    market?.question,
+    market?.slug,
+    market?.description,
+    market?.category,
+    ...(Array.isArray(market?.tags) ? market.tags : []),
+    ...(Array.isArray(market?.events)
+      ? market.events.flatMap((event) => [event?.title, event?.slug, ...(Array.isArray(event?.tags) ? event.tags : [])])
+      : [])
+  ]
+    .filter((value) => typeof value === 'string' && value.trim())
+    .join(' ')
+    .toLowerCase();
+
+  return CRYPTO_KEYWORDS.some((keyword) => searchable.includes(keyword));
 }
 
 function renderMarket(market) {
@@ -70,7 +89,7 @@ async function loadMarkets() {
     const res = await fetch('/api/polymarket?limit=50');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const payload = await res.json();
-    markets = payload.markets || [];
+    markets = (payload.markets || []).filter(isCryptoMarket);
 
     if (!markets.length) throw new Error('No se recibieron mercados');
 
@@ -85,7 +104,7 @@ async function loadMarkets() {
     renderMarket(markets[0]);
     statusEl.textContent = payload.source === 'fallback'
       ? 'Mostrando datos de demostración (fallback por límite de API).'
-      : `Datos en vivo: ${markets.length} mercados cargados.`;
+      : `Datos en vivo: ${markets.length} mercados de criptomonedas cargados.`;
   } catch (err) {
     statusEl.textContent = `Error al cargar mercados: ${err.message}`;
   }
