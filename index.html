@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PolyDash | Dashboard de mercados</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-bg"></div>
+    <main class="container">
+      <header class="hero">
+        <p class="eyebrow">Polymarket Analytics</p>
+        <h1>Dashboard de liquidez y probabilidad</h1>
+        <p class="subtitle">Selecciona un mercado para ver movimiento de probabilidad, liquidez y señales clave.</p>
+      </header>
+
+      <section class="panel controls">
+        <label for="market-select">Activo / Mercado</label>
+        <select id="market-select" aria-label="Selecciona un mercado"></select>
+        <button id="refresh-btn" type="button">Actualizar datos</button>
+        <p id="status" class="status">Cargando mercados...</p>
+      </section>
+
+      <section class="grid" id="metrics-grid">
+        <article class="panel metric">
+          <h2>Probabilidad actual (Yes)</h2>
+          <p id="probability" class="metric-value">--</p>
+        </article>
+        <article class="panel metric">
+          <h2>Cambio 24h</h2>
+          <p id="prob-shift" class="metric-value">--</p>
+        </article>
+        <article class="panel metric">
+          <h2>Liquidez</h2>
+          <p id="liquidity" class="metric-value">--</p>
+        </article>
+        <article class="panel metric">
+          <h2>Volumen 24h</h2>
+          <p id="volume" class="metric-value">--</p>
+        </article>
+      </section>
+
+      <section class="panel details">
+        <h2>Detalles relevantes</h2>
+        <ul id="highlights"></ul>
+      </section>
+    </main>
+
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
